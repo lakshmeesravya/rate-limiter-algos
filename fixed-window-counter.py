@@ -80,7 +80,7 @@ def test_concurrent_requests():
     limiter = RateLimiter()
     limiter.add_user("user1", 5, 1)
 
-    # Create 5 worker threads that will try to add requests to the queue concurrently
+    # Create worker threads that will try to add requests to the queue concurrently
     threads = [threading.Thread(target=worker, args=(limiter, i, "user1")) for i in range(8)]
 
     # Start the threads
