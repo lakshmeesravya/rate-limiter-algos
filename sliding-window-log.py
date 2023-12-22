@@ -10,13 +10,13 @@ class SlidingWindowLog(object):
             self.window = []
             self.lock = threading.Lock()
     
-        def add_request(self):
+        def add_request(self, time):
             with self.lock:
-                self.window = [t for t in self.window if t > time.time() - self.time_window]
+                self.window = [t for t in self.window if t > time - self.time_window]
                 if len(self.window) >= self.capacity:
                     return False
                 else:
-                    self.window.append(time.time())
+                    self.window.append(time)
                     return True
                 
         def get_capacity(self):
@@ -47,10 +47,10 @@ class RateLimiter(object):
             else:
                 print("User does not exist")
 
-    def shouldAllowServiceCall(self, request_id, user_id):
+    def shouldAllowServiceCall(self, user_id, time):
         with self.lock:
             if user_id in self.ratelimiterMap:
-                return self.ratelimiterMap[user_id].add_request()
+                return self.ratelimiterMap[user_id].add_request(time)
             else:
                 print("User does not exist")
                 return False
@@ -58,7 +58,7 @@ class RateLimiter(object):
 # Test the rate limiter
 
 def worker(limiter, request_id, user_id):
-    if limiter.shouldAllowServiceCall(request_id, user_id):
+    if limiter.shouldAllowServiceCall(user_id, time.time()):
         print(f"Service call allowed for {request_id}. Current window size is {limiter.ratelimiterMap[user_id].get_window_size()}.")
     else:
         print(f"Service call denied for {request_id}. Current window size is {limiter.ratelimiterMap[user_id].get_window_size()}.")
